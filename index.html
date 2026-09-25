@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CELESTINOX — Loja Digital</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: Arial, sans-serif; }
+        body { background: #f0f2f5; min-height: 100vh; padding-bottom: 70px; }
+        
+        .topo {
+            background: #006650; color: white; padding: 15px; text-align: center;
+            font-size: 22px; font-weight: bold;
+        }
+        
+        .caixa { max-width: 480px; margin: 15px auto; padding: 0 15px; }
+        
+        .titulo-sec {
+            font-size: 22px; color: #006650; margin: 20px 0 10px; display: flex;
+            align-items: center; gap: 8px;
+        }
+        
+        .grade { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin: 15px 0; }
+        .card-servico {
+            background: white; border-radius: 14px; padding: 18px 12px;
+            border: 2px solid #006650; cursor: pointer; transition: all 0.2s;
+        }
+        .card-servico:active { transform: scale(0.97); background: #e8f5e9; }
+        .card-icone { font-size: 32px; text-align: center; margin-bottom: 8px; }
+        .card-nome { font-weight: bold; font-size: 16px; color: #006650; text-align: center; }
+        .card-desc { font-size: 13px; color: #666; text-align: center; margin-top: 4px; }
+        
+        .cartao {
+            background: white; border-radius: 12px; padding: 20px; margin: 15px 0;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+        }
+        
+        label { display: block; font-weight: bold; color: #006650; margin: 12px 0 5px; }
+        input, textarea, select {
+            width: 100%; padding: 12px; border: 1px solid #006650;
+            border-radius: 8px; font-size: 15px;
+        }
+        textarea { min-height: 90px; resize: vertical; }
+        
+        .botao {
+            width: 100%; padding: 14px; background: #006650; color: white;
+            border: none; border-radius: 8px; font-size: 16px; font-weight: bold;
+            margin-top: 15px; cursor: pointer;
+        }
+        .botao.voltar { background: #e0e0e0; color: #333; margin-top: 10px; }
+        .botao.verde-claro { background: #25D366; }
+        .botao.pequeno { padding: 10px; font-size: 14px; margin-top: 8px; }
+        
+        .tela { display: none; }
+        .tela.ativa { display: block; }
+        
+        .menu {
+            position: fixed; bottom: 0; left: 0; width: 100%; background: white;
+            display: flex; justify-content: space-around; padding: 10px 0;
+            border-top: 3px solid #006650;
+        }
+        .menu-btn { text-align: center; font-size: 12px; color: #666; cursor: pointer; }
+        .menu-btn.ativo { color: #006650; font-weight: bold; }
+        .menu-ico { font-size: 20px; margin-bottom: 2px; }
+        
+        .grafico-container {
+            background: #f9f9f9; border-radius: 10px; padding: 15px; margin: 15px 0;
+        }
+        .grafico-barras {
+            display: flex; align-items: flex-end; justify-content: space-between;
+            height: 150px; padding: 10px 5px; gap: 8px;
+        }
+        .barra { width: 18%; border-radius: 6px 6px 0 0; transition: height 0.3s; background: #ccc; }
+        .barra.verde { background: #25D366; }
+        .barra.vermelha { background: #dc3545; }
+        .etiqueta-grafico { text-align: center; font-size: 11px; color: #666; margin-top: 5px; }
+        
+        .linha-progresso {
+            height: 12px; background: #e0e0e0; border-radius: 6px; margin: 10px 0; overflow: hidden;
+        }
+        .linha-progresso span {
+            display: block; height: 100%; background: linear-gradient(90deg, #006650, #25D366);
+            border-radius: 6px; transition: width 0.4s;
+        }
+        
+        .dado-visual {
+            background: #f5f5f5; padding: 12px; border-radius: 8px; margin-top: 8px;
+            font-family: monospace; word-break: break-all;
+        }
+        
+        .vazio { text-align: center; padding: 30px; color: #999; }
+        .lista-item { padding: 12px 0; border-bottom: 1px solid #eee; }
+        .apagar { color: #dc3545; font-size: 13px; cursor: pointer; margin-top: 5px; display: inline-block; }
+        
+        .aba { display: flex; gap: 8px; margin: 15px 0; }
+        .aba-btn { flex: 1; padding: 10px; border: 2px solid #ddd; background: white; border-radius: 8px; cursor: pointer; text-align: center; font-size: 14px; }
+        .aba-btn.ativo { border-color: #006650; background: #e8f5e9; color: #006650; font-weight: bold; }
+        .aba-conteudo { display: none; }
+        .aba-conteudo.ativa { display: block; }
+        
+        .aviso { background: #fff3cd; border-left: 4px solid #ffc107; padding: 10px; margin: 10px 0; border-radius: 4px; font-size: 13px; }
+        .sucesso { background: #d4edda; border-left: 4px solid #28a745; padding: 10px; margin: 10px 0; border-radius: 4px; font-size: 13px; }
+    </style>
+</head>
+<body>
+
+<div class="topo">CELESTINOX 🚀</div>
+<div class="caixa">
+
+    <!-- ====================================== -->
+    <!-- TELA INÍCIO — TODOS OS 8 SERVIÇOS     -->
+    <!-- ====================================== -->
+    <div class="tela ativa" id="telaInicio">
+        <h2 class="titulo-sec">✨ Nossos Serviços</h2>
+        <div class="grade">
+            <div class="card-servico" onclick="abrirTela('telaLoja')">
+                <div class="card-icone">🏪</div>
+                <div class="card-nome">Loja Online</div>
+                <div class="card-desc">Configurar minha loja</div>
+            </div>
+            <div class="card-servico" onclick="abrirTela('telaProjetos')">
+                <div class="card-icone">📐</div>
+                <div class="card-nome">Projetos & Design</div>
+                <div class="card-desc">Planos e desenhos</div>
+            </div>
+            <div class="card-servico" onclick="abrirTela('telaGestao')">
+                <div class="card-icone">💼</div>
+                <div class="card-nome">Gestão de Negócio</div>
+                <div class="card-desc">Organização completa</div>
+            </div>
+            <div class="card-servico" onclick="abrirTela('telaFinancas')">
+                <div class="card-icone">📊</div>
+                <div class="card-nome">Finanças & Análise</div>
+                <div class="card-desc">Dados e relatórios</div>
+            </div>
+            <div class="card-servico" onclick="abrirTela('telaSite')">
+                <div class="card-icone">🌐</div>
+                <div class="card-nome">Site Profissional</div>
+                <div class="card-desc">Presença na internet</div>
+            </div>
+            <div class="card-servico" onclick="abrirTela('telaMarca')">
+                <div class="card-icone">🎨</div>
+                <div class="card-nome">Identidade Visual</div>
+                <div class="card-desc">Imagem da marca</div>
+            </div>
+            <div class="card-servico" onclick="abrirTela('telaCartao')">
+                <div class="card-icone">📱</div>
+                <div class="card-nome">Cartão Digital</div>
+                <div class="card-desc">Design personalizado</div>
+            </div>
+            <div class="card-servico" onclick="abrirTela('telaCrescimento')">
+                <div class="card-icone">📈</div>
+                <div class="card-nome">Crescimento</div>
+                <div class="card-desc">Estratégias práticas</div>
+            </div>
+        </div>
+        
+        <h2 class="titulo-sec">🛒 Meus Produtos</h2>
+        <div class="cartao" id="resumoProdutos">
+            <div class="vazio">Ainda sem produtos.</div>
+        </div>
+    </div>
+
+    <!-- ====================================== -->
+    <!-- 🏪 LOJA ONLINE — Função completa      -->
+    <!-- ====================================== -->
+    <div class="tela" id="telaLoja">
+        <h2 class="titulo-sec">🏪 Loja Online</h2>
+        <div class="cartao">
+            <h3>Configurar Minha Loja</h3>
+            <label>Nome da Loja:</label>
+            <input type="text" id="lojaNome" placeholder="Ex: CELESTINOX">
+            <label>Tipo de Produtos que Vendes:</label>
+            <input type="text" id="lojaTipo" placeholder="Ex: Logótipos, Cartões, Sites...">
+            <label>Descrição da Loja:</label>
+            <textarea id="lojaDesc" placeholder="O que os clientes encontram aqui..."></textarea>
+            <button class="botao" onclick="alert('✅ Loja configurada!')">💾 Guardar Configuração</button>
+        </div>
+        <div class="cartao">
+            <h3>Adicionar Produto à Loja</h3>
+            <label>Nome do Produto:</label>
+            <input type="text" id="prodNome" placeholder="Ex: Logótipo Personalizado">
+            <label>Descrição:</label>
+            <textarea id="prodDesc" placeholder="O que o cliente recebe..."></textarea>
+            <label>Preço (KZ):</label>
+            <input type="text" id="prodPreco" placeholder="Ex: 5.000 KZ">
+            <button class="botao verde-claro" onclick="adicionarProduto()">✅ Adicionar Produto</button>
+        </div>
+        <div class="cartao">
+            <h3>Produtos à Venda</h3>
+            <div id="listaProdutosLoja"><div class="vazio">Nenhum produto adicionado.</div></div>
+        </div>
+        <button class="botao voltar" onclick="abrirTela('telaInicio')">⬅️ Voltar</button>
+    </div>
+
+    <!-- ====================================== -->
+    <!-- 📐 PROJETOS & DESIGN — Função completa -->
+    <!-- ====================================== -->
+    <div class="tela" id="telaProjetos">
+        <h2 class="titulo-sec">📐 Projetos & Design</h2>
+        <div class="cartao">
+            <h3>Registar Novo Projeto</h3>
+            <label>Nome do Projeto:</label>
+            <input type="text" id="projNome" placeholder="Ex: Logótipo para Loja X">
+            <label>Tipo de Trabalho:</label>
+            <select id="projTipo">
+                <option>Logótipo</option><option>Cartão de Visita</option><option>Desenho / Ilustração</option>
+                <option>Layout de Página</option><option>Projeto Completo</option><option>Outro</option>
+            </select>
+            <label>Estado do Projeto:</label>
+            <select id="projEstado">
+                <option>Ideia / Planeamento</option><option>Em Desenvolvimento</option>
+                <option>Revisão</option><option>✅ Concluído</option><option>Entregue ao Cliente</option>
+            </select>
+            <button class="botao" onclick="alert('✅ Projeto registado!')">✅ Registar Projeto</button>
+        </div>
+        <button class="botao voltar" onclick="abrirTela('telaInicio')">⬅️ Voltar</button>
+    </div>
+
+    <!-- ====================================== -->
+    <!-- 💼 GESTÃO DE NEGÓCIO — Função completa -->
+    <!-- ====================================== -->
+    <div class="tela" id="telaGestao">
+        <h2 class="titulo-sec">💼 Gestão de Negócio</h2>
+        <div class="cartao">
+            <h3>Dados da Empresa / Marca</h3>
+            <label>Nome da Marca:</label>
+            <input type="text" id="gestaoNome" value="CELESTINOX">
+            <label>Missão — O que fazemos:</label>
+            <textarea id="gestaoMissao">Criação e venda de produtos digitais de qualidade em Angola</textarea>
+            <label>Visão — Onde queremos chegar:</label>
+            <textarea id="gestaoVisao">Ser referência em soluções digitais para negócios angolanos</textarea>
+            <label>Objetivo deste Mês:</label>
+            <input type="text" id="gestaoObjetivo" placeholder="Ex: Vender 15 produtos">
+            <button class="botao" onclick="alert('✅ Negócio organizado!')">💾 Guardar Estrutura</button>
+        </div>
+        <button class="botao voltar" onclick="abrirTela('telaInicio')">⬅️ Voltar</button>
+    </div>
+
+    <!-- ====================================== -->
+    <!-- 📊 FINANÇAS — Gráfico subir/descer    -->
+    <!-- ====================================== -->
+    <div class="tela" id="telaFinancas">
+        <h2 class="titulo-sec">📊 Finanças & Análise</h2>
+        <div class="cartao">
+            <h3>Saldo Atual</h3>
+            <p style="font-size: 28px; font-weight: bold; color: #006650; text-align: center; padding: 10px;">
+                <span id="saldoTotal">0</span> KZ
+            </p>
+        </div>
+        <div class="grafico-container">
+            <h3 style="text-align: center; margin-bottom: 10px;">📈 Subiu ou Desceu?</h3>
+            <div class="grafico-barras">
+                <div style="text-align:center; width:18%;"><div class="barra verde" style="height:30px;"></div><div class="etiqueta-grafico">S1</div></div>
+                <div style="text-align:center; width:18%;"><div class="barra verde" style="height:45px;"></div><div class="etiqueta-grafico">S2</div></div>
+                <div style="text-align:center; width:18%;"><div class="barra verde" style="height:65px;"></div><div class="etiqueta-grafico">S3</div></div>
+                <div style="text-align:center; width:18%;"><div class="barra" id="barraSem4" style="height:40px;"></div><div class="etiqueta-grafico">S4</div></div>
+                <div style="text-align:center; width:18%;"><div class="barra" id="barraSem5" style="height:0;"></div><div class="etiqueta-grafico">S5</div></div>
+            </div>
+            <p style="text-align:center; font-size:13px; color:#666; margin-top:8px;">🟢 Mais alto = mais dinheiro entrou 🔴 Mais baixo = menos dinheiro</p>
+        </div>
+        <div class="cartao">
+            <h3>Registar Movimento</h3>
+            <label>Tipo:</label>
+            <select id="finTipo">
+                <option value="receita">💰 Entrada — Dinheiro que entrou</option>
+                <option value="despesa">💸 Saída — Dinheiro que saiu</option>
+            </select>
+            <label>Descrição:</label>
+            <input type="text" id="finDesc" placeholder="Ex: Venda de Logótipo">
+            <label>Valor (KZ):</label>
+            <input type="number" id="finValor" placeholder="0">
+            <button class="botao" onclick="alert('✅ Movimento registado!')">✅ Registar</button>
+        </div>
+        <button class="botao voltar" onclick="abrirTela('telaInicio')">⬅️ Voltar</button>
+    </div>
+
+    <!-- ====================================== -->
+    <!-- 🌐 SITE PROFISSIONAL — Função completa -->
+    <!-- ====================================== -->
+    <div class="tela" id="telaSite">
+        <h2 class="titulo-sec">🌐 Site Profissional</h2>
+        <div class="cartao">
+            <h3>Configurar Minha Página na Internet</h3>
+            <label>Nome do Site / Endereço:</label>
+            <input type="text" id="siteDominio" placeholder="Ex: celestinox.co.ao">
+            <label>Título:</label>
+            <input type="text" id="siteTitulo" placeholder="CELESTINOX — Produtos Digitais">
+            <label>Descrição:</label>
+            <textarea id="siteDesc" placeholder="O que aparece quando alguém pesquisa..."></textarea>
+            <button class="botao" onclick="alert('✅ Dados guardados!')">💾 Guardar</button>
+        </div>
+        <button class="botao voltar" onclick="abrirTela('telaInicio')">⬅️ Voltar</button>
+    </div>
+
+    <!-- ====================================== -->
+    <!-- 🎨 IDENTIDADE VISUAL — Função completa -->
+    <!-- ====================================== -->
+    <div class="tela" id="telaMarca">
+        <h2 class="titulo-sec">🎨 Identidade Visual</h2>
+        <div class="cartao">
+            <h3>Definir Imagem da Marca</h3>
+            <label>Nome da Marca:</label>
+            <input type="text" id="marcaNome" value="CELESTINOX">
+            <label>Cores Principais:</label>
+            <input type="text" id="marcaCores" placeholder="Ex: Verde-escuro, Branco, Dourado">
+            <label>Estilo:</label>
+            <textarea id="marcaEstilo" placeholder="Moderno, forte, limpo, profissional..."></textarea>
+            <button class="botao" onclick="alert('✅ Identidade guardada!')">💾 Guardar</button>
+        </div>
+        <button class="botao voltar" onclick="abrirTela('telaInicio')">⬅️ Voltar</button>
+    </div>
+
+    <!-- ====================================== -->
+    <!-- 📱 CARTÃO DIGITAL — Função completa    -->
+    <!-- ====================================== -->
+    <div class="tela" id="telaCartao">
+        <h2 class="titulo-sec">📱 Cartão Digital</h2>
+        <div class="cartao">
+            <h3>Dados para o Teu Cartão</h3>
+            <label>Nome Completo:</label>
+            <input type="text" id="cartaoNome" placeholder="O teu nome">
+            <label>Função:</label>
+            <input type="text" id="cartaoFuncao" placeholder="Criador de Produtos Digitais">
+            <label>WhatsApp:</label>
+            <input type="text" id="cartaoWats" placeholder="+244 9XX XXX XXX">
+            <button class="botao" onclick="alert('✅ Pedido enviado!')">📩 Solicitar Cartão</button>
+        </div>
+        <button class="botao voltar" onclick="abrirTela('telaInicio')">⬅️ Voltar</button>
+    </div>
+
+    <!-- ====================================== -->
+    <!-- 📈 CRESCIMENTO — Função completa       -->
+    <!-- ====================================== -->
+    <div class="tela" id="telaCrescimento">
+        <h2 class="titulo-sec">📈 Crescimento</h2>
+        <div class="cartao">
+            <h3>Meta Atual</h3>
+            <label>Objetivo:</label>
+            <input type="text" id="metaTexto" placeholder="Ex: Vender 20 produtos este mês">
+            <label>Progresso (%):</label>
+            <input type="range" id="metaProgresso" min="0" max="100" value="0" oninput="document.getElementById('barraProgresso').style.width = this.value + '%'; document.getElementById('porcentagem').textContent = this.value;">
+            <div class="linha-progresso"><span id="barraProgresso" style="width:0%;"></span></div>
+            <p style="text-align:center; font-weight:bold; margin-top:5px;"><span id="porcentagem">0</span>% concluído</p>
+        </div>
+        <div class="cartao" style="background:#e8f5e9;">
+            <h3>💡 Dica de Crescimento</h3>
+            <p style="color:#006650; line-height:1.7;">
+                Partilha o teu trabalho todos os dias. Quanto mais pessoas virem, mais clientes aparecem! 🚀
+            </p>
+        </div>
+        <button class="botao voltar" onclick="abrirTela('telaInicio')">⬅️ Voltar</button>
+    </div>
+
+    <!-- ====================================== -->
+    <!-- 💳 PAGAMENTO — NOVO! País→Banco Auto  -->
+    <!-- ====================================== -->
+    <div class="tela" id="telaPagamento">
+        <h2 class="titulo-sec">💳 Formas de Recebimento</h2>
+
+        <div class="aba">
+            <button class="aba-btn ativo" onclick="mudarAba('iban')">🏦 IBAN</button>
+            <button class="aba-btn" onclick="mudarAba('referencia')">📋 Referência</button>
+            <button class="aba-btn" onclick="mudarAba('expresso')">📱 Expresso</button>
+        </div>
+
+        <!-- === IBAN — País → Banco aparece automático === -->
+        <div class="aba-conteudo ativa" id="aba-iban">
+            <div class="cartao">
+                <h3>🏦 Dados Bancários</h3>
+                <label>País:</label>
+                <select id="selPais" onchange="atualizarListaBancos()">
+                    <option value="">— Escolhe o teu país —</option>
+                    <option value="AO">🇦🇴 Angola</option>
+                    <option value="PT">🇵🇹 Portugal</option>
+                    <option value="MZ">🇲🇿 Moçambique</option>
+                </select>
+
+                <label>Banco:</label>
+                <select id="selBanco">
+                    <option value="">— Primeiro escolhe o país —</option>
+                </select>
+
+                <label>IBAN:</label>
+                <input type="text" id="bancoIban" placeholder="Ex: AO06 1234 5678...">
+
+                <label>Nome do Titular:</label>
+                <input type="text" id="bancoTitular" placeholder="Nome completo">
+
+                <button class="botao" onclick="guardarPagamento(); alert('✅ Dados guardados!')">💾 Confirmar</button>
+            </div>
+            <div class="cartao">
+                <h3>👁️ O cliente vê:</h3>
+                <div class="dado-visual">
+                    <p><strong>País:</strong> <span id="verPais">—</span></p>
+                    <p><strong>Banco:</strong> <span id="verBanco">—</span></p>
+                    <p><strong>IBAN:</strong> <span id="verIban">—</span></p>
+                    <p><strong>Nome:</strong> <span id="verTitular">—</span></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- === REFERÊNCIA === -->
+        <div class="aba-conteudo" id="aba-referencia">
+            <div class="cartao">
+                <h3>📋 Pagamento por Referência</h3>
+                <label>Entidade:</label>
+                <input type="text" id="refEntidade" placeholder="Ex: 00525">
+                <label>Referência:</label>
+                <input type="text" id="refReferencia" placeholder="Ex: 123456789">
+                <button class="botao verde-claro" onclick="alert('✅ Referência pronta!')">💾 Guardar</button>
+            </div>
+            <div class="cartao">
+                <h3>👁️ O cliente vê:</h3>
+                <div class="dado-visual">
+                    <p>🏦 Entidade: <span id="verRefEnt">—</span></p>
+                    <p>📋 Referência: <span id="verRefRef">—</span></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- === EXPRESSO === -->
+        <div class="aba-conteudo" id="aba-expresso">
+            <div class="cartao">
+                <h3>📱 Multicaixa Expresso</h3>
+                <label>Número de Telemóvel:</label>
+                <input type="tel" id="expressoNum" placeholder="+244 9XX XXX XXX">
+                <button class="botao verde-claro" onclick="alert('✅ Número guardado!')">💾 Guardar</button>
+            </div>
+            <div class="cartao">
+                <h3>👁️ O cliente vê:</h3>
+                <div class="dado-visual">
+                    <p>📱 Enviar para: <span id="verExpresso">—</span></p>
+                </div>
+            </div>
+        </div>
+
+        <button class="botao voltar" onclick="abrirTela('telaInicio')">⬅️ Voltar</button>
+    </div>
+
+</div>
+
+<!-- MENU DE BAIXO — IGUALZINHO À IMAGEM -->
+<div class="menu">
+    <div class="menu-btn ativo" id="mInicio" onclick="abrirTela('telaInicio')">
+        <div class="menu-ico">🏠</div>Início
+    </div>
+    <div class="menu-btn" id="mAdicionar" onclick="abrirTela('telaLoja')">
+        <div class="menu-ico">➕</div>Adicionar
+    </div>
+    <div class="menu-btn" id="mPagamento" onclick="abrirTela('telaPagamento')">
+        <div class="menu-ico">💳</div>Pagamento
+    </div>
+    <div class="menu-btn" id="mControlo" onclick="abrirTela('telaGestao')">
+        <div class="menu-ico">⚙️</div>Controlo
+    </div>
+</div>
+
+<script>
+// ======================================
+// LISTA DE BANCOS POR PAÍS — APARECE AUTOMÁTICO
+// ======================================
+const BANCOS = {
+    AO: [
+        "Banco BAI",
+        "Banco BIC",
+        "Banco de Fomento (BFA)",
+        "Banco de Poupança e Crédito (BPC)",
+        "Banco Millennium Atlântico",
+        "Banco Económico",
+        "Banco Keve",
+        "Banco Yetu",
+        "Standard Bank Angola",
+        "Ecobank Angola",
+        "Outro banco de Angola"
+    ],
+    PT: [
+        "Caixa Geral de Depósitos",
+        "Banco Santander",
+        "Banco Millennium BCP",
+        "Novo Banco",
+        "Outro banco de Portugal"
+    ],
+    MZ: [
+        "Banco de Moçambique",
+        "Millennium BIM",
+        "Standard Bank Moçambique",
+        "Banco Comercial e de Investimentos",
+        "Outro banco de Moçambique"
+    ]
+};
+
+let produtos = [];
+
+// ======================================
+// NAVEGAÇÃO — TUDO FUNCIONA
+// ======================================
+function abrirTela(id) {
+    document.querySelectorAll('.tela').forEach(t => t.classList.remove('ativa'));
+    document.getElementById(id).classList.add('ativa');
+    
+    document.querySelectorAll('.menu-btn').forEach(m => m.classList.remove('ativo'));
+    if(id === 'telaInicio') document.getElementById('mInicio').classList.add('ativo');
+    if(id === 'telaLoja') document.getElementById('mAdicionar').classList.add('ativo');
+    if(id === 'telaPagamento') document.getElementById('mPagamento').classList.add('ativo');
+    if(id === 'telaGestao') document.getElementById('mControlo').classList.add('ativo');
+}
+
+// TROCAR ABA NO PAGAMENTO
+function mudarAba(nome) {
+    document.querySelectorAll('.aba-btn').forEach(b => b.classList.remove('ativo'));
+    document.querySelectorAll('.aba-conteudo').forEach(c => c.classList.remove('ativa'));
+    event.target.classList.add('ativo');
+    document.getElementById('aba-' + nome).classList.add('ativa');
+}
+
+// ESCOLHE PAÍS → BANCOS APARECEM AUTOMÁTICO ✅
+function atualizarListaBancos() {
+    const pais = document.getElementById('selPais').value;
+    const lista = document.getElementById('selBanco');
+    
+    lista.innerHTML = '';
+    
+    if(!pais) {
+        lista.innerHTML = '<option value="">— Primeiro escolhe o país —</option>';
+        return;
+    }
+    
+    BANCOS[pais].forEach(banco => {
+        const op = document.createElement('option');
+        op.value = banco;
+        op.textContent = banco;
+        lista.appendChild(op);
+    });
+}
+
+// GUARDAR DADOS DE PAGAMENTO
+function guardarPagamento() {
+    const paisEl = document.getElementById('selPais');
+    const paisTexto = paisEl.options[paisEl.selectedIndex].text;
+    const banco = document.getElementById('selBanco').value;
+    const iban = document.getElementById('bancoIban').value;
+    const titular = document.getElementById('bancoTitular').value;
+    
+    document.getElementById('verPais').textContent = paisTexto || '—';
+    document.getElementById('verBanco').textContent = banco || '—';
+    document.getElementById('verIban').textContent = iban || '—';
+    document.getElementById('verTitular').textContent = titular || '—';
+    
+    // Referência
+    document.getElementById('verRefEnt').textContent = document.getElementById('refEntidade').value || '—';
+    document.getElementById('verRefRef').textContent = document.getElementById('refReferencia').value || '—';
+    
+    // Expresso
+    document.getElementById('verExpresso').textContent = document.getElementById('expressoNum').value || '—';
+}
+
+// ADICIONAR PRODUTO
+function adicionarProduto() {
+    const nome = document.getElementById('prodNome').value.trim();
+    const preco = document.getElementById('prodPreco').value.trim();
+    if(!nome) { alert('⚠️ Escreve o nome do produto!'); return; }
+    
+    produtos.push({ nome, preco });
+    document.getElementById('prodNome').value = '';
+    document.getElementById('prodPreco').value = '';
+    
+    let html = '';
+    produtos.forEach(p => {
+        html += `<div class="lista-item"><strong>${p.nome}</strong><br>Preço: ${p.preco || 'A definir'} KZ</div>`;
+    });
+    
+    document.getElementById('listaProdutosLoja').innerHTML = html;
+    document.getElementById('resumoProdutos').innerHTML = `<div class="cartao">${html}</div>`;
+    alert('✅ Produto adicionado!');
+}
+</script>
+
+</body>
+</html>
